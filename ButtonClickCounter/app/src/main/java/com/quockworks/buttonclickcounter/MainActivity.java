@@ -1,15 +1,23 @@
 package com.quockworks.buttonclickcounter;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    // Create objects corresponding to views added to content_main.xml
+    private Button myButton;
+    private TextView myMessage;
+
+    // Counter for the number of taps on the button, initialized at 0
+    private int numTaps = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,14 +26,28 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        // Instantiate button and textView
+        myButton = (Button) findViewById(R.id.button);
+        myMessage = (TextView) findViewById(R.id.textView);
+
+        // Create and set OnClickListener for the button
+        View.OnClickListener myClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+            public void onClick(View v){
+                numTaps++;
+                setMessage();
             }
-        });
+        };
+        myButton.setOnClickListener(myClickListener);
+
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
     }
 
     @Override
@@ -44,9 +66,21 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Toast toastMessage = Toast.makeText(this,"Settings menu tapped! Button taps reset!",Toast.LENGTH_LONG);
+            toastMessage.show();
+            numTaps = 0;
+            setMessage();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setMessage(){
+        String result = "Button tapped: " + numTaps + " time";
+        if(numTaps != 1){
+            result += "s";
+        }
+        myMessage.setText(result);
     }
 }

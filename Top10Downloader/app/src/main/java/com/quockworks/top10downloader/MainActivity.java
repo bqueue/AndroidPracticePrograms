@@ -7,7 +7,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +21,9 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
     public static final String top10Url = "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml";
 
-    private TextView xmlTextView;
+    private Button btnParse;            // "Parse XML File" button
+    private ListView listApps;          // View on the view to list the data
+    private String mFileContents;       // Downloaded XML data, passed to parser
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,12 +31,25 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        xmlTextView = (TextView) findViewById(R.id.xmlTextView);
+        btnParse = (Button) findViewById(R.id.btnParse);
+        listApps = (ListView) findViewById(R.id.xmlListView);
 
+        // Download XML file from online url (see DownloadData inner class below)
         DownloadData downloadData = new DownloadData();
         downloadData.execute(top10Url);
 
+        btnParse.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Parse downloaded XML data
+                ParseApplications parseApplications = new ParseApplications(mFileContents);
+                parseApplications.process();
 
+                // Add parsed data to list view
+                ArrayAdapter<Application> arrayAdapter = new ArrayAdapter<Application>(MainActivity.this, R.layout.list_item, parseApplications.getApplications());
+                listApps.setAdapter(arrayAdapter);
+            }
+        });
 
 //        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setOnClickListener(new View.OnClickListener() {
@@ -67,8 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
     // 3 parameters: 1) download location, 2) progress bar, 3) resultant data type
     private class DownloadData extends AsyncTask<String, Void, String>{
-
-        private String mFileContents;
 
         // Run without blocking
         @Override
@@ -117,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Log.d("DownloadData", "Result was " + result);
-            xmlTextView.setText(mFileContents);
+
         }
     }
 }
